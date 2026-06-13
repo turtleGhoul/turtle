@@ -41,6 +41,11 @@ mongoose.connect(process.env.mongo_uri)
 
 const player = new Player(client, {
 
+    ytdloptions: {
+        quality: "lowestaudio",
+        highWaterMark: 1 << 25,
+    },
+
     bridgeProvider:  {
         bridgeGuard: true,
         defaultBridge: "soundcloud",
