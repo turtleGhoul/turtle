@@ -6,6 +6,7 @@ const User = require('./User');
 require('dotenv').config();
 const { Player } = require('discord-player');
 const { DefaultExtractors } = require('@discord-player/extractor');
+const { VoiceConnectionStatus } = require('@discordjs/voice');
 
 //uptime
 
@@ -41,6 +42,8 @@ mongoose.connect(process.env.mongo_uri)
 
 const player = new Player(client, {
 
+    connectionTimeout: 30000,
+
     ytdloptions: {
         quality: "lowestaudio",
         highWaterMark: 1 << 25,
@@ -54,6 +57,13 @@ const player = new Player(client, {
 
 player.extractors.loadMulti(DefaultExtractors);
  
+player.events.on('connection', (queue) => {
+    queue.dispatcher.voiceConnection.on('stateChange', (oldState, newState) => {
+        if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+            queue.dispatcher.voiceConnection.configureNetworking();
+        }
+    });
+});
 
 player.events.on(`playerStart`, (queue, track) => {
     queue.metadata.send(`**${track.title}** am laufen`);
@@ -63,6 +73,12 @@ player.events.on(`emptyQueue`, (queue) => {
     queue.metadata.send(`keine tracks über. fütter mich!`);
 });
 
+player.events.on('error', (queue, error) => {
+    console.log(`[Player Fehler]: ${error.message}`);
+});
+player.events.on('playerError', (queue, error) => {
+    console.log(`[Audio Fehler]: ${error.message}`);
+});
 
 
 client.once(Events.ClientReady, c => {
