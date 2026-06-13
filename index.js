@@ -82,7 +82,7 @@ player.events.on('playerError', (queue, error) => {
 });
 
 
-client.once(Events.ClientReady, c => {
+client.once(Events.ClientReady, async (c) => {
     console.log(`ni hao , ${c.user.tag} ist ready!`);
 
     try {
