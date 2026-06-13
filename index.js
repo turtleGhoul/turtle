@@ -7,7 +7,7 @@ require('dotenv').config();
 const { Player } = require('discord-player');
 const { DefaultExtractors } = require('@discord-player/extractor');
 const { VoiceConnectionStatus } = require('@discordjs/voice');
-const ffmpeg = require('ffmpeg-static');
+
 
 //uptime
 
@@ -55,8 +55,6 @@ const player = new Player(client, {
         defaultBridge: "soundcloud",
     }        
 });
-
-process.env.DP_FORCE_FFMPEG = ffmpeg;
 
 player.extractors.loadMulti(DefaultExtractors);
  
