@@ -39,58 +39,10 @@ mongoose.connect(process.env.mongo_uri)
     .then(() => console.log('MongoDB verbunden'))
     .catch(err => console.error('MongoDB Verbindungsfehler:', err));
 
-// music events
-
-const player = new Player(client, {
-
-    connectionTimeout: 30000,
-
-    ytdlOptions: {
-        quality: "lowestaudio",
-        highWaterMark: 1 << 25,
-    },
-
-    bridgeProvider:  {
-        bridgeGuard: true,
-        defaultBridge: "soundcloud",
-    }        
-});
-
-
- 
-player.events.on('connection', (queue) => {
-    queue.dispatcher.voiceConnection.on('stateChange', (oldState, newState) => {
-        if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
-            queue.dispatcher.voiceConnection.configureNetworking();
-        }
-    });
-});
-
-player.events.on(`playerStart`, (queue, track) => {
-    queue.metadata.send(`**${track.title}** am laufen`);
-});
-
-player.events.on(`emptyQueue`, (queue) => {
-    queue.metadata.send(`keine tracks über. fütter mich!`);
-});
-
-player.events.on('error', (queue, error) => {
-    console.log(`[Player Fehler]: ${error.message}`);
-});
-player.events.on('playerError', (queue, error) => {
-    console.log(`[Audio Fehler]: ${error.message}`);
-});
 
 
 client.once(Events.ClientReady, async (c) => {
     console.log(`ni hao , ${c.user.tag} ist ready!`);
-
-    try {
-        await player.extractors.loadMulti(DefaultExtractors);
-        console.log('-> Musik-Extractor wurden im Hintergrund sicher geladen!');
-    } catch (error) {
-        console.error('Fehler beim Laden der Musik-Extractor:', error);
-    }
 });
 
 client.textCommands = new Collection();
