@@ -56,7 +56,7 @@ const player = new Player(client, {
     }        
 });
 
-await player.extractors.loadMulti(DefaultExtractors);
+player.extractors.loadMulti(DefaultExtractors);
  
 player.events.on('connection', (queue) => {
     queue.dispatcher.voiceConnection.on('stateChange', (oldState, newState) => {
