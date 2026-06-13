@@ -45,7 +45,7 @@ const player = new Player(client, {
 
     connectionTimeout: 30000,
 
-    ytdloptions: {
+    ytdlOptions: {
         quality: "lowestaudio",
         highWaterMark: 1 << 25,
     },
@@ -56,7 +56,7 @@ const player = new Player(client, {
     }        
 });
 
-player.extractors.loadMulti(DefaultExtractors);
+await player.extractors.loadMulti(DefaultExtractors);
  
 player.events.on('connection', (queue) => {
     queue.dispatcher.voiceConnection.on('stateChange', (oldState, newState) => {
