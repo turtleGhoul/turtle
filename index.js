@@ -7,6 +7,20 @@ require('dotenv').config();
 const { Player } = require('discord-player');
 const { DefaultExtractors } = require('@discord-player/extractor');
 
+//uptime
+
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('Bot ist online!');
+});
+
+app.listen(port, () => {
+  console.log(`Webserver läuft auf Port ${port}`);
+});
+
 const client = new Client({ 
     intents: [
         GatewayIntentBits.Guilds,
