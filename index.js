@@ -56,7 +56,7 @@ const player = new Player(client, {
     }        
 });
 
-player.extractors.loadMulti(DefaultExtractors);
+
  
 player.events.on('connection', (queue) => {
     queue.dispatcher.voiceConnection.on('stateChange', (oldState, newState) => {
@@ -84,6 +84,13 @@ player.events.on('playerError', (queue, error) => {
 
 client.once(Events.ClientReady, c => {
     console.log(`ni hao , ${c.user.tag} ist ready!`);
+
+    try {
+        await player.extractors.loadMulti(DefaultExtractors);
+        console.log('-> Musik-Extractor wurden im Hintergrund sicher geladen!');
+    } catch (error) {
+        console.error('Fehler beim Laden der Musik-Extractor:', error);
+    }
 });
 
 client.textCommands = new Collection();
