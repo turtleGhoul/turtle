@@ -14,6 +14,8 @@ module.exports = {
 
     async execute(interaction) {
 
+        await interaction.deferReply({ ephemeral: true });
+
         const voiceChannel = interaction.member.voice.channel;
         const text = interaction.options.getString('text');
 
@@ -37,14 +39,33 @@ module.exports = {
             adapterCreator: voiceChannel.guild.voiceAdapterCreator,
         });
 
-        const player = createAudioPlayer();
-        const resource = createAudioResource(url);
+        try {
+            
+            await entersState(connection, VoiceConnectionStatus.Ready, 2000);
 
+            const player = createAudioPlayer();
+            
+            const resource = createAudioResource(url);
 
-        connection.subscribe(player);
-        player.play(resource);
+            connection.subscribe(player);
+            player.play(resource);
+
+            await interaction.followUp({ content: 'yap yap', ephemeral: true });
+
+            player.on(AudioPlayerStatus.Idle, () => {
+                connection.destroy();
+            });
+
+            player.on('error', error => {
+                console.error('Fehler beim AudioPlayer:', error);
+                connection.destroy();
+            });
+
+        } catch (error) {
+            connection.destroy();
+            await interaction.followUp({ content: 'whoopsie.. etwas ist schiefgelaufen ', ephemeral: true });
+        }
         
-        interaction.reply({ content: 'yap yap', ephemeral: true });
 
         player.on(AudioPlayerStatus.Idle, () => {
             connection.destroy();
