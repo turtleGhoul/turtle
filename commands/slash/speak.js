@@ -26,7 +26,6 @@ module.exports = {
             return interaction.editReply({ content: 'der text ist zu lang, bitte kürze ihn auf 200 zeichen' });
         }
 
-        // Wir senden die Anfrage an ttsmp3 (Nutzt die hochwertige Amazon-Polly-Stimme "Hans")
         const postData = `msg=${encodeURIComponent(text)}&lang=Hans&source=ttsmp3`;
 
         const options = {
@@ -48,7 +47,7 @@ module.exports = {
                     const responseJson = JSON.parse(body);
                     
                     if (!responseJson.URL) {
-                        return interaction.editReply({ content: 'Fehler bei der Spracherzeugung.' });
+                        return interaction.editReply({ content: 'fehler bei der spracherzeugung.' });
                     }
 
                     const audioUrl = responseJson.URL;
@@ -82,14 +81,14 @@ module.exports = {
 
                 } catch (e) {
                     console.error(e);
-                    interaction.editReply({ content: 'whoopsie.. Serverfehler.' });
+                    interaction.editReply({ content: 'whoopsie.. serverfehler.' });
                 }
             });
         });
 
         req.on('error', (error) => {
             console.error(error);
-            interaction.editReply({ content: 'whoopsie.. Verbindungsfehler.' });
+            interaction.editReply({ content: 'whoopsie.. verbindungsfehler.' });
         });
 
         req.write(postData);
