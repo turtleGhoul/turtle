@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const googleTTS = require('google-tts-api');
-const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
+const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus, StreamType } = require('@discordjs/voice');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -32,20 +32,25 @@ module.exports = {
             host: 'https://google.com',
         }); 
 
+        const player = createAudioPlayer();
+        const resource = createAudioResource(url, {
+            inputType: StreamType.Arbitrary,
+            inlineVolume: false
+        });
+
+        player.play(resource);
+
         const connection = joinVoiceChannel({
             channelId: voiceChannel.id,
             guildId: voiceChannel.guild.id,
             adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+            selfDeaf: false
         });
 
         try {
             await entersState(connection, VoiceConnectionStatus.Ready, 5000);
-
-            const player = createAudioPlayer();
-            const resource = createAudioResource(url);
-
+            
             connection.subscribe(player);
-            player.play(resource);
 
             await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
 
