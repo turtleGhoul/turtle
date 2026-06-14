@@ -1,27 +1,37 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus, StreamType } = require('@discordjs/voice');
-const { Readable } = require('stream');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('speak')
-        .setDescription(`lass mich im voice reden`),
+        .setDescription(`lass mich im voice reden`)
+        .addStringOption(option =>
+            option.setName('text')
+                .setDescription('was soll ich sagen bruda?')
+                .setRequired(true)
+        ),
 
     async execute(interaction) {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
         const voiceChannel = interaction.member.voice.channel;
+        const text = interaction.options.getString('text');
 
         if (!voiceChannel) {
             return interaction.editReply({ content: 'musst in nem voice sein' });
         }
 
-        const buffer = Buffer.alloc(48000 * 2);
-        for (let i = 0; i < buffer.length; i++) {
-            buffer[i] = Math.floor(Math.random() * 256);
+        if (text.length > 200) {
+            return interaction.editReply({ content: 'der text ist zu lang, bitte kürze ihn auf 200 zeichen' });
         }
 
-        const silenceStream = Readable.from(buffer);
+        const myUrl = new URL('https://google.com');
+        myUrl.searchParams.append('ie', 'UTF-8');
+        myUrl.searchParams.append('tl', 'de');
+        myUrl.searchParams.append('client', 'tw-ob');
+        myUrl.searchParams.append('q', text);
+
+        const urlString = myUrl.toString();
 
         const connection = joinVoiceChannel({
             channelId: voiceChannel.id,
@@ -33,14 +43,14 @@ module.exports = {
             await entersState(connection, VoiceConnectionStatus.Ready, 5000);
 
             const player = createAudioPlayer();
-            const resource = createAudioResource(silenceStream, {
-                inputType: StreamType.Raw
+            const resource = createAudioResource(urlString, {
+                inputType: StreamType.Arbitrary
             });
 
             connection.subscribe(player);
             player.play(resource);
 
-            await interaction.followUp({ content: 'Teste internen Audio-Stream...', flags: [MessageFlags.Ephemeral] });
+            await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
 
             player.on(AudioPlayerStatus.Idle, () => {
                 connection.destroy();
