@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { googleTTS } = require('google-tts-api');
+const googleTTS  = require('google-tts-api');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus } = require('@discordjs/voice');
 
 module.exports = {
