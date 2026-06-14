@@ -1,7 +1,6 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus, StreamType } = require('@discordjs/voice');
-const EasyTTS = require('easy-tts');
-const { Readable } = require('stream');
+const https = require('https');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -27,41 +26,73 @@ module.exports = {
             return interaction.editReply({ content: 'der text ist zu lang, bitte kürze ihn auf 200 zeichen' });
         }
 
-        try {
-            const tts = new EasyTTS();
-            const audioBuffer = await tts.generate(text, { lang: 'de' });
-            const audioStream = Readable.from(audioBuffer);
+        // Wir senden die Anfrage an ttsmp3 (Nutzt die hochwertige Amazon-Polly-Stimme "Hans")
+        const postData = `msg=${encodeURIComponent(text)}&lang=Hans&source=ttsmp3`;
 
-            const connection = joinVoiceChannel({
-                channelId: voiceChannel.id,
-                guildId: voiceChannel.guild.id,
-                adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+        const options = {
+            hostname: 'ttsmp3.com',
+            path: '/makemp3.php',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            let body = '';
+            res.on('data', (chunk) => body += chunk);
+            
+            res.on('end', async () => {
+                try {
+                    const responseJson = JSON.parse(body);
+                    
+                    if (!responseJson.URL) {
+                        return interaction.editReply({ content: 'Fehler bei der Spracherzeugung.' });
+                    }
+
+                    const audioUrl = responseJson.URL;
+
+                    const connection = joinVoiceChannel({
+                        channelId: voiceChannel.id,
+                        guildId: voiceChannel.guild.id,
+                        adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+                    });
+
+                    await entersState(connection, VoiceConnectionStatus.Ready, 5000);
+
+                    const player = createAudioPlayer();
+                    const resource = createAudioResource(audioUrl, {
+                        inputType: StreamType.Arbitrary
+                    });
+
+                    connection.subscribe(player);
+                    player.play(resource);
+
+                    await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
+
+                    player.on(AudioPlayerStatus.Idle, () => {
+                        connection.destroy();
+                    });
+
+                    player.on('error', error => {
+                        console.error(error);
+                        connection.destroy();
+                    });
+
+                } catch (e) {
+                    console.error(e);
+                    interaction.editReply({ content: 'whoopsie.. Serverfehler.' });
+                }
             });
+        });
 
-            await entersState(connection, VoiceConnectionStatus.Ready, 5000);
-
-            const player = createAudioPlayer();
-            const resource = createAudioResource(audioStream, {
-                inputType: StreamType.Arbitrary
-            });
-
-            connection.subscribe(player);
-            player.play(resource);
-
-            await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
-
-            player.on(AudioPlayerStatus.Idle, () => {
-                connection.destroy();
-            });
-
-            player.on('error', error => {
-                console.error(error);
-                connection.destroy();
-            });
-
-        } catch (error) {
+        req.on('error', (error) => {
             console.error(error);
-            await interaction.followUp({ content: 'whoopsie.. etwas ist schiefgelaufen', flags: [MessageFlags.Ephemeral] });
-        }
+            interaction.editReply({ content: 'whoopsie.. Verbindungsfehler.' });
+        });
+
+        req.write(postData);
+        req.end();
     },
 };
