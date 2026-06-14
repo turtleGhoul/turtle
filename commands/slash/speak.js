@@ -1,8 +1,7 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
-const say = require('say');
-const path = require('path');
-const fs = require('fs');
+const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus, StreamType } = require('@discordjs/voice');
+const EasyTTS = require('easy-tts');
+const { Readable } = require('stream');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -28,13 +27,10 @@ module.exports = {
             return interaction.editReply({ content: 'der text ist zu lang, bitte kürze ihn auf 200 zeichen' });
         }
 
-        const tempFilePath = path.join(__dirname, `tts_${Date.now()}.wav`);
-
-        say.export(text, null, 1, tempFilePath, async (err) => {
-            if (err) {
-                console.error(err);
-                return interaction.editReply({ content: 'Fehler bei der Spracherzeugung.' });
-            }
+        try {
+            const tts = new EasyTTS();
+            const audioBuffer = await tts.generate(text, { lang: 'de' });
+            const audioStream = Readable.from(audioBuffer);
 
             const connection = joinVoiceChannel({
                 channelId: voiceChannel.id,
@@ -42,43 +38,30 @@ module.exports = {
                 adapterCreator: voiceChannel.guild.voiceAdapterCreator,
             });
 
-            try {
-                await entersState(connection, VoiceConnectionStatus.Ready, 5000);
+            await entersState(connection, VoiceConnectionStatus.Ready, 5000);
 
-                const player = createAudioPlayer();
-                const resource = createAudioResource(tempFilePath);
+            const player = createAudioPlayer();
+            const resource = createAudioResource(audioStream, {
+                inputType: StreamType.Arbitrary
+            });
 
-                connection.subscribe(player);
-                player.play(resource);
+            connection.subscribe(player);
+            player.play(resource);
 
-                await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
+            await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
 
-                const fallbackTimeout = setTimeout(() => {
-                    if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
-                        connection.destroy();
-                    }
-                    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-                }, 15000);
+            player.on(AudioPlayerStatus.Idle, () => {
+                connection.destroy();
+            });
 
-                player.on(AudioPlayerStatus.Idle, () => {
-                    clearTimeout(fallbackTimeout);
-                    connection.destroy();
-                    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-                });
-
-                player.on('error', error => {
-                    console.error(error);
-                    clearTimeout(fallbackTimeout);
-                    connection.destroy();
-                    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-                });
-
-            } catch (error) {
+            player.on('error', error => {
                 console.error(error);
                 connection.destroy();
-                if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
-                await interaction.followUp({ content: 'whoopsie.. etwas ist schiefgelaufen', flags: [MessageFlags.Ephemeral] });
-            }
-        });
+            });
+
+        } catch (error) {
+            console.error(error);
+            await interaction.followUp({ content: 'whoopsie.. etwas ist schiefgelaufen', flags: [MessageFlags.Ephemeral] });
+        }
     },
 };
