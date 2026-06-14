@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const googleTTS  = require('google-tts-api');
-const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus } = require('@discordjs/voice');
+const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -20,11 +20,13 @@ module.exports = {
         const text = interaction.options.getString('text');
 
         if (!voiceChannel) {
-            return interaction.reply({ content: 'musst in nem voice sein', ephemeral: true });
+
+            return interaction.editReply({ content: 'musst in nem voice sein' });
         }
 
         if (text.length > 200) {
-            return interaction.reply({ content: 'der text ist zu lang, bitte kürze ihn auf 200 zeichen', ephemeral: true });
+
+            return interaction.editReply({ content: 'der text ist zu lang, bitte kürze ihn auf 200 zeichen' });
         }
 
         const url = googleTTS.getAudioUrl(text, {
@@ -40,11 +42,10 @@ module.exports = {
         });
 
         try {
-            
-            await entersState(connection, VoiceConnectionStatus.Ready, 2000);
+           
+            await entersState(connection, VoiceConnectionStatus.Ready, 5000);
 
             const player = createAudioPlayer();
-            
             const resource = createAudioResource(url);
 
             connection.subscribe(player);
@@ -62,14 +63,10 @@ module.exports = {
             });
 
         } catch (error) {
+            console.error("Fehler im Try-Block:", error);
             connection.destroy();
             await interaction.followUp({ content: 'whoopsie.. etwas ist schiefgelaufen ', ephemeral: true });
         }
         
-
-        player.on(AudioPlayerStatus.Idle, () => {
-            connection.destroy();
-        });
     },
 };
-        
