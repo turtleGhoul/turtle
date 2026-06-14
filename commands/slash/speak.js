@@ -43,6 +43,8 @@ module.exports = {
 
         connection.subscribe(player);
         player.play(resource);
+        
+        interaction.reply({ content: 'yap yap', ephemeral: true });
 
         player.on(AudioPlayerStatus.Idle, () => {
             connection.destroy();
