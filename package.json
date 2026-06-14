@@ -23,6 +23,7 @@
     "libsodium-wrappers": "^0.8.4",
     "mediaplex": "^1.0.0",
     "mongoose": "^9.7.0",
+    "say": "^0.16.0",
     "sodium-native": "^5.1.0",
     "utf-8-validate": "^6.0.6"
   }

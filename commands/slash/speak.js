@@ -1,5 +1,8 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus, StreamType } = require('@discordjs/voice');
+const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
+const say = require('say');
+const path = require('path');
+const fs = require('fs');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -25,46 +28,57 @@ module.exports = {
             return interaction.editReply({ content: 'der text ist zu lang, bitte kürze ihn auf 200 zeichen' });
         }
 
-        const myUrl = new URL('https://google.com');
-        myUrl.searchParams.append('ie', 'UTF-8');
-        myUrl.searchParams.append('tl', 'de');
-        myUrl.searchParams.append('client', 'tw-ob');
-        myUrl.searchParams.append('q', text);
+        const tempFilePath = path.join(__dirname, `tts_${Date.now()}.wav`);
 
-        const urlString = myUrl.toString();
+        say.export(text, null, 1, tempFilePath, async (err) => {
+            if (err) {
+                console.error(err);
+                return interaction.editReply({ content: 'Fehler bei der Spracherzeugung.' });
+            }
 
-        const connection = joinVoiceChannel({
-            channelId: voiceChannel.id,
-            guildId: voiceChannel.guild.id,
-            adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-        });
-
-        try {
-            await entersState(connection, VoiceConnectionStatus.Ready, 5000);
-
-            const player = createAudioPlayer();
-            const resource = createAudioResource(urlString, {
-                inputType: StreamType.Arbitrary
+            const connection = joinVoiceChannel({
+                channelId: voiceChannel.id,
+                guildId: voiceChannel.guild.id,
+                adapterCreator: voiceChannel.guild.voiceAdapterCreator,
             });
 
-            connection.subscribe(player);
-            player.play(resource);
+            try {
+                await entersState(connection, VoiceConnectionStatus.Ready, 5000);
 
-            await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
+                const player = createAudioPlayer();
+                const resource = createAudioResource(tempFilePath);
 
-            player.on(AudioPlayerStatus.Idle, () => {
-                connection.destroy();
-            });
+                connection.subscribe(player);
+                player.play(resource);
 
-            player.on('error', error => {
+                await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
+
+                const fallbackTimeout = setTimeout(() => {
+                    if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
+                        connection.destroy();
+                    }
+                    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+                }, 15000);
+
+                player.on(AudioPlayerStatus.Idle, () => {
+                    clearTimeout(fallbackTimeout);
+                    connection.destroy();
+                    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+                });
+
+                player.on('error', error => {
+                    console.error(error);
+                    clearTimeout(fallbackTimeout);
+                    connection.destroy();
+                    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+                });
+
+            } catch (error) {
                 console.error(error);
                 connection.destroy();
-            });
-
-        } catch (error) {
-            console.error(error);
-            connection.destroy();
-            await interaction.followUp({ content: 'whoopsie.. etwas ist schiefgelaufen', flags: [MessageFlags.Ephemeral] });
-        }
+                if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+                await interaction.followUp({ content: 'whoopsie.. etwas ist schiefgelaufen', flags: [MessageFlags.Ephemeral] });
+            }
+        });
     },
 };
