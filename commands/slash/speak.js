@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus, StreamType } = require('@discordjs/voice');
+const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus, StreamType, NoSubscriberBehavior } = require('@discordjs/voice');
 const https = require('https');
 
 module.exports = {
@@ -45,10 +45,7 @@ module.exports = {
             res.on('end', async () => {
                 try {
                     const responseJson = JSON.parse(body);
-                    
-                    if (!responseJson.URL) {
-                        return interaction.editReply({ content: 'fehler bei der spracherzeugung.' });
-                    }
+                    if (!responseJson.URL) return interaction.editReply({ content: 'Fehler bei der Spracherzeugung.' });
 
                     const audioUrl = responseJson.URL;
 
@@ -56,39 +53,57 @@ module.exports = {
                         channelId: voiceChannel.id,
                         guildId: voiceChannel.guild.id,
                         adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+                        selfDeaf: false
                     });
 
                     await entersState(connection, VoiceConnectionStatus.Ready, 5000);
 
-                    const player = createAudioPlayer();
+                    const player = createAudioPlayer({
+                        behaviors: {
+                            noSubscriber: NoSubscriberBehavior.Play
+                        }
+                    });
+
                     const resource = createAudioResource(audioUrl, {
                         inputType: StreamType.Arbitrary
                     });
 
                     connection.subscribe(player);
-                    player.play(resource);
+                    
+                    process.nextTick(() => {
+                        player.play(resource);
+                    });
 
                     await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
 
+                    const fallbackTimeout = setTimeout(() => {
+                        if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
+                            connection.destroy();
+                        }
+                    }, 15000);
+
                     player.on(AudioPlayerStatus.Idle, () => {
+                        clearTimeout(fallbackTimeout);
                         connection.destroy();
                     });
 
                     player.on('error', error => {
                         console.error(error);
+                        clearTimeout(fallbackTimeout);
                         connection.destroy();
                     });
 
                 } catch (e) {
                     console.error(e);
-                    interaction.editReply({ content: 'whoopsie.. serverfehler.' });
+                    connection.destroy();
+                    interaction.editReply({ content: 'whoopsie.. Serverfehler.' });
                 }
             });
         });
 
         req.on('error', (error) => {
             console.error(error);
-            interaction.editReply({ content: 'whoopsie.. verbindungsfehler.' });
+            interaction.editReply({ content: 'whoopsie.. Verbindungsfehler.' });
         });
 
         req.write(postData);
