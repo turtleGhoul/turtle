@@ -1,73 +1,53 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const googleTTS = require('google-tts-api');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, AudioPlayerStatus, entersState, VoiceConnectionStatus, StreamType } = require('@discordjs/voice');
+const { Readable } = require('stream');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('speak')
-        .setDescription(`lass mich im voice reden`)
-        .addStringOption(option =>
-            option.setName('text')
-                .setDescription('was soll ich sagen bruda?')
-                .setRequired(true)
-        ),
+        .setDescription(`lass mich im voice reden`),
 
     async execute(interaction) {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
         const voiceChannel = interaction.member.voice.channel;
-        const text = interaction.options.getString('text');
 
         if (!voiceChannel) {
             return interaction.editReply({ content: 'musst in nem voice sein' });
         }
 
-        if (text.length > 200) {
-            return interaction.editReply({ content: 'der text ist zu lang, bitte kürze ihn auf 200 zeichen' });
+        const buffer = Buffer.alloc(48000 * 2);
+        for (let i = 0; i < buffer.length; i++) {
+            buffer[i] = Math.floor(Math.random() * 256);
         }
 
-        const url = googleTTS.getAudioUrl(text, {
-            lang: 'de',
-            slow: false,
-            host: 'https://google.com',
-        }); 
-
-        const player = createAudioPlayer();
-        const resource = createAudioResource(url, {
-            inputType: StreamType.Arbitrary,
-            inlineVolume: false
-        });
-
-        player.play(resource);
+        const silenceStream = Readable.from(buffer);
 
         const connection = joinVoiceChannel({
             channelId: voiceChannel.id,
             guildId: voiceChannel.guild.id,
             adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-            selfDeaf: false
         });
 
         try {
             await entersState(connection, VoiceConnectionStatus.Ready, 5000);
-            
+
+            const player = createAudioPlayer();
+            const resource = createAudioResource(silenceStream, {
+                inputType: StreamType.Raw
+            });
+
             connection.subscribe(player);
+            player.play(resource);
 
-            await interaction.followUp({ content: 'yap yap', flags: [MessageFlags.Ephemeral] });
-
-            const fallbackTimeout = setTimeout(() => {
-                if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
-                    connection.destroy();
-                }
-            }, 10000);
+            await interaction.followUp({ content: 'Teste internen Audio-Stream...', flags: [MessageFlags.Ephemeral] });
 
             player.on(AudioPlayerStatus.Idle, () => {
-                clearTimeout(fallbackTimeout);
                 connection.destroy();
             });
 
             player.on('error', error => {
                 console.error(error);
-                clearTimeout(fallbackTimeout);
                 connection.destroy();
             });
 

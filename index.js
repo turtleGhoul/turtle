@@ -8,8 +8,6 @@ const { Player } = require('discord-player');
 const { DefaultExtractors } = require('@discord-player/extractor');
 const { VoiceConnectionStatus } = require('@discordjs/voice');
 
-console.log(require('@discordjs/voice').generateDependencyReport());
-
 //uptime
 
 const express = require('express');
