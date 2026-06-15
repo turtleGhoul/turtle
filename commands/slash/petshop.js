@@ -25,10 +25,10 @@ module.exports = {
         let shopDescription = `balance: **${coins}**\n`
 
         if (gutschein > 0)  {
-            shopDescription += `gutscheine: **${gutschein}**\n`
+            shopDescription += `gutscheine: **${gutschein}**\n\n`
         }
 
-        shopDescription += `ANGEBOT\n\n`
+        shopDescription += `**ANGEBOT**\n\n`
 
         Object.keys(pet_shop).forEach(key =>   {
 
@@ -36,9 +36,9 @@ module.exports = {
             const inBesitz = collectedpets.includes(key)
 
             if  ( inBesitz )    {
-                shopDescription += `${pet.emoji} | **${pet.name}** -- in besitz`
+                shopDescription += `${pet.emoji} | **${pet.name}** -- in besitz\n`
             } else {
-                shopDescription += `${pet.emoji} | **${pet.name}** -- ${pet.price}`
+                shopDescription += `${pet.emoji} | **${pet.name}** -- ${pet.price}\n`
             }
         })
 
