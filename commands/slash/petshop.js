@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js")
 const pet_shop = require("../../config.js");
-const User = require("./User.js")
+const User = require('../../User');
 
 module.exports = {
 
