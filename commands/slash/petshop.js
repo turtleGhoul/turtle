@@ -10,7 +10,7 @@ module.exports = {
     
     async execute(interaction)  {
 
-        const id = interaction.author.userId
+        const id = interaction.user.id
 
         let user = await User.findOne({ userId: id })
         if ( !user )    {
