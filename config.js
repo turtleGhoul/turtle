@@ -50,4 +50,4 @@ const pet_shop = {
     },
 }
 
-module.exports = [ pet_shop ]
+module.exports = pet_shop
