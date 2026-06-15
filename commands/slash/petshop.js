@@ -5,7 +5,7 @@ const User = require('../../User');
 module.exports = {
 
     data: new SlashCommandBuilder()
-        .setName("pet shop")
+        .setName("petshop")
         .setDescription("kaufe ein haustierchen"),
     
     async execute(interaction)  {
