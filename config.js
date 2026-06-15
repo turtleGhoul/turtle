@@ -49,3 +49,5 @@ const pet_shop = {
         event: false,
     },
 }
+
+module.exports = [ pet_shop ]
