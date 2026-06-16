@@ -42,13 +42,12 @@ module.exports = {
             } else {
                 shopDescription += `${pet.emoji} | **${pet.name}** -- ${pet.price}\n`
 
-                menuOptions.push(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel(pet.name)
-                    .setValue(key)
-                    .setDescription(`${pet.price} coins`)
-                    .setEmoji(pet.emoji)
-            )
+                menuOptions.push({
+                    label: pet.name,
+                    value: key,
+                    description: `${pet.price} coins`,
+                    emoji: pet.emoji
+                })
             }
 
         })
@@ -60,11 +59,13 @@ module.exports = {
         if  ( menuOptions.length > 0 )  {
             buySelectMenu.addOptions(menuOptions)
         }  else {
-            buySelectMenu.addOptions(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel(`leer`)
-                    .setValue(`none`)
-            ).setDisabled(true)
+            buySelectMenu.addOptions([
+                {
+                    label: `leer`,
+                    value: `none`
+                }
+            ])
+            buySelectMenu.setDisabled(true)
         }
         
         const embed = new EmbedBuilder()
