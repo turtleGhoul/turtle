@@ -53,6 +53,9 @@ module.exports = {
             .addFields(
                 {
                     name: `collected pets:`, value: collectedPetsText, inline: false
+                },
+                {
+                    name: `collected badges:`, value: `coming soon..`, inline: false
                 }
             )
             .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
