@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js")
+const { SlashCommandBuilder, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require("discord.js")
 const pet_shop = require("../../config.js");
 const User = require('../../User');
 
@@ -30,6 +30,8 @@ module.exports = {
 
         shopDescription += `**ANGEBOT**\n\n`
 
+        const menuOptions = []
+
         Object.keys(pet_shop).forEach(key =>   {
 
             const pet = pet_shop[key]
@@ -39,16 +41,42 @@ module.exports = {
                 shopDescription += `${pet.emoji} | **${pet.name}** -- in besitz\n`
             } else {
                 shopDescription += `${pet.emoji} | **${pet.name}** -- ${pet.price}\n`
-            }
-        })
 
+                menuOptions.push(
+                new StringSelectMenuBuilder()
+                    .setLabel(pet.name)
+                    .setValue(key)
+                    .setDescription(`${pet.price} coins`)
+                    .setEmoji(pet.emoji)
+            )
+            }
+
+        })
+        
+        const buySelectMenu = new StringSelectMenuBuilder()
+            .setCustomId("buySelect")
+            .setPlaceholder(menuOptions.length > 0 ? `einkaufswagen` : `schon alle tiere in besitz`)
+
+        if  ( menuOptions.length > 0 )  {
+            buySelectMenu.addOptions(menuOptions)
+        }  else {
+            buySelectMenu.addOptions(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(`leer`)
+                    .setValue(`none`)
+            ).setDisabled(true)
+        }
+        
         const embed = new EmbedBuilder()
             .setTitle("Pet Shop")
             .setDescription(shopDescription)
             .setColor(0x5CE65C)
             .setTimestamp()
 
-        await interaction.reply({ embeds: [ embed ]})
+        const row = new ActionRowBuilder()
+            .addComponents(buySelectMenu)
+
+        await interaction.reply({ embeds: [ embed ], components: [row]})
     }
 
 }
