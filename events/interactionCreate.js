@@ -24,7 +24,7 @@ module.exports = {
 
         // select menus
 
-        
+
         if (interaction.isStringSelectMenu()) {
             
             if (interaction.customId === 'buySelect') {
@@ -53,7 +53,7 @@ module.exports = {
                     user.gutschein -= 1;
                     user.collectedpets.push(petKey);
                     await user.save();
-                    await interaction.reply({content: `${pet.name}  gekauft :>`})
+                    await interaction.followUp({content: `${pet.name}  gekauft :>`, ephemeral: true})
                     return
                 }
 
@@ -66,7 +66,7 @@ module.exports = {
                 
                 await user.save();
 
-                await interaction.reply({content: `${pet.name}  gekauft :>`})
+                await interaction.followUp({content: `${pet.name}  gekauft :>`, ephemeral: true})
             }
         }
     },

@@ -22,7 +22,7 @@ module.exports = {
         const gutschein = user.gutschein
         const collectedpets = user.collectedpets
 
-        let shopDescription = `balance: **${coins}**\n`
+        let shopDescription = `balance: **${coins}**\n\n`
 
         if (gutschein > 0)  {
             shopDescription += `gutscheine: **${gutschein}**\n\n`
