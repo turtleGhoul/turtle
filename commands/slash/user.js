@@ -2,6 +2,7 @@ const { EmbedBuilder } = require("@discordjs/builders");
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const pet_shop = require("../../config.js");
 const User = require('../../User');
+const { FileUploadAssertions } = require("discord.js");
 
 
 module.exports = {
@@ -48,11 +49,11 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${interaction.user.username}`)
-            .setDescription(`coins: ${user.coins}\n\n
+            .setDescription(`coins: ${user.coins}\n
                 active pet: ${activePetText}`)
             .addFields(
                 {
-                    name: `collected pets:`, value: collectedPetsText, inline: true
+                    name: `collected pets:`, value: collectedPetsText, inline: false
                 }
             )
             .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
