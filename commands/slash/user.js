@@ -26,7 +26,7 @@ module.exports = {
 
                 const petConfig = pet_shop[key]
 
-                if ( petconfig )    {
+                if ( petConfig )    {
                     return `${petConfig.emoji} ${petConfig.name}`
                 }
                 return key
