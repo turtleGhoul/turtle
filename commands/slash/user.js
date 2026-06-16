@@ -19,17 +19,47 @@ module.exports = {
                     await user.save()
                 }
 
+        let collectedPetsText = `keine tiere im besitz`
+        if ( user.collectedpets && user.collectedpets.length > 0 )  {
+
+            const petList = user.collectedpets.map(key =>   {
+
+                const petConfig = pet_shop[key]
+
+                if ( petconfig )    {
+                    return `${petConfig.emoji} ${petConfig.name}`
+                }
+                return key
+            })
+            
+            collectedPetsText = petList.join(`\n`)
+        }
+
+        let activePetText = `none`
+        if ( user.pet && user.pet !== `none` && pet_shop[user.pet]) {
+            const petConfig = pet_shop[user.pet]
+
+            if ( user.petname !== `none`)   {
+                activePetText = `**${petConfig.petname}** (${petConfig.petname})`
+            } else {
+                activePetText = `**${petConfig.name}**`
+            }
+        }
 
         const embed = new EmbedBuilder()
             .setTitle(`${interaction.user.username}`)
-            .setDescription(`coins: ${user.coins}\n
-                active pet: ${user.pet}\n
-                collected pets: ${user.collectedpets}`)
+            .setDescription(`coins: ${user.coins}\n\n
+                active pet: ${activePetText}`)
+            .addFields(
+                {
+                    name: `collected pets:`, value: collectedPetsText, inline: true
+                }
+            )
             .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
             .setColor(0x5CE65C)
             .setTimestamp()
 
 
-        await interaction.reply({embeds: [embed]})
+        await interaction.reply({embeds: [embed], })
     }
 };
