@@ -49,8 +49,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`${interaction.user.username}`)
-            .setDescription(`coins: ${user.coins}\n
-                active pet: ${activePetText}`)
+            .setDescription(`coins: ${user.coins}\nactive pet: ${activePetText}`)
             .addFields(
                 {
                     name: `collected pets:`, value: collectedPetsText, inline: false
