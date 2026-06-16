@@ -43,7 +43,7 @@ module.exports = {
                 shopDescription += `${pet.emoji} | **${pet.name}** -- ${pet.price}\n`
 
                 menuOptions.push(
-                new StringSelectMenuBuilder()
+                new StringSelectMenuOptionBuilder()
                     .setLabel(pet.name)
                     .setValue(key)
                     .setDescription(`${pet.price} coins`)
