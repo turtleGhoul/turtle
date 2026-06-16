@@ -48,6 +48,13 @@ const pet_shop = {
         description: "fledermaus halt",
         event: false,
     },
+    raven:  {
+        name: "rabe",
+        price: "300",
+        emoji: "🐦‍⬛",
+        description: "rabe halt",
+        event: false
+    }
 }
 
 module.exports = pet_shop
