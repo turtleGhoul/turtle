@@ -33,7 +33,7 @@ module.exports = {
                 return key
             })
             
-            collectedPetsText = `> ` + petList.join(`\n>`)
+            collectedPetsText = `> ` + petList.join(`\n> `)
         }
 
         let activePetText = `none`
