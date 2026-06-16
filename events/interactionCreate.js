@@ -46,7 +46,7 @@ module.exports = {
                 }
 
                 if (user.collectedpets.includes(petKey)) {
-                    return interaction.followUp({ content: `${pet.name} bereits im besitz`, ephemeral: true });
+                    return interaction.followUp({ content: `${pet.name} besitzt du schon`, ephemeral: true });
                 }
 
                 if (user.gutschein > 0) {
@@ -58,7 +58,7 @@ module.exports = {
                 }
 
                 if (user.coins < pet.price) {
-                    return interaction.followUp({ content: `Du hast nicht genug Coins! **${pet.name}** kostet ${pet.price} Coins. Du hast nur ${user.coins}.`, ephemeral: true });
+                    return interaction.followUp({ content: `einer ist broke und will tier kaufen...`, ephemeral: true });
                 }
 
                 user.coins -= pet.price;
