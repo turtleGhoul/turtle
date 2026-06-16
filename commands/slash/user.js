@@ -52,10 +52,10 @@ module.exports = {
             .setDescription(`coins: ${user.coins}\nactive pet: ${activePetText}\nxp:${user.petEXP}`)
             .addFields(
                 {
-                    name: `collected pets:`, value: collectedPetsText, inline: false
+                    name: `collected pets:`, value: collectedPetsText, inline: true
                 },
                 {
-                    name: `collected badges:`, value: `coming soon..`, inline: false
+                    name: `collected badges:`, value: `coming soon..`, inline: true
                 }
             )
             .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
