@@ -150,7 +150,7 @@ module.exports = {
                 embed.setDescription(`coins: ${user.coins}\nactive pet: ${neuActivePetText}\nxp: ${user.petEXP}`)
 
                 await i.update({embeds: [embed], components: components})
-                await i.followUp({content: `auf gehts ${pet_shop[chosen].name}!!`, emphemeral: true})
+                await i.followUp({content: `auf gehts ${pet_shop[chosen].name}!!`, ephemeral: true})
             }
 
             if ( i.isButton() && i.customId === "nicknameButton")   {
