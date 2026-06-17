@@ -31,8 +31,8 @@ const rest = new REST().setToken(process.env.bot_token);
 
 
         const data = await rest.put(
-            Routes.applicationGuildCommands(process.env.client_id, "980437511992147990"),
-            { body: [] },
+            Routes.applicationCommands(process.env.client_id),
+            { body: commands },
         );
 
         console.log(`done :> , ${data.length} slash-commands registriert`);
