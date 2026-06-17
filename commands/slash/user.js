@@ -41,7 +41,7 @@ module.exports = {
             const petConfig = pet_shop[user.pet]
 
             if ( user.petname !== `none`)   {
-                activePetText = `**${petConfig.petname}** (${petConfig.petname})`
+                activePetText = `**${user.petname}** (${petConfig.petname})`
             } else {
                 activePetText = `**${petConfig.name}**`
             }
@@ -95,7 +95,7 @@ module.exports = {
             ButtonRow = new ActionRowBuilder().addComponents(button)
         }
 
-        const components = [ selectMenu ]  
+        const components = [ SelectRow ]  
         if ( ButtonRow )    {
             components.push(ButtonRow)
         }
@@ -117,6 +117,6 @@ module.exports = {
             .setTimestamp()
 
 
-        await interaction.reply({embeds: [embed], components: [components] })
+        await interaction.reply({embeds: [embed], components: components })
     }
 };
