@@ -43,7 +43,7 @@ module.exports = {
             const petConfig = pet_shop[user.pet]
 
             if ( user.petname !== `none`)   {
-                activePetText = `**${user.petname}** (${petConfig.petname})`
+                activePetText = `**${user.petname}** (${petConfig.name})`
             } else {
                 activePetText = `**${petConfig.name}**`
             }
