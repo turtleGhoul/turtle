@@ -136,7 +136,21 @@ module.exports = {
                 user.pet = chosen
                 await user.save()
 
-                await i.reply({content: `auf gehts ${pet_shop[chosen].name}!!`})
+                const petConfig = pet_shop[chosen]
+
+                let neuActivePetText = `none`
+                if (petConfig)  {
+                    if ( user.petname && user.petname !== `none`) {
+                        neuActivePetText = `**${user.petname}** (${petConfig.name})`
+                    } else  {
+                        neuActivePetText = `**${petConfig.name}**`
+                    }
+                }
+
+                embed.setDescription(`coins: ${user.coins}\nactive pet: ${neuActivePetText}\nxp: ${user.petEXP}`)
+
+                await i.update({embeds: [embed], components: components})
+                await i.reply({content: `auf gehts ${pet_shop[chosen].name}!!`, emphemeral: true})
             }
 
             if ( i.isButton() && i.customId === "nicknameButton")   {
@@ -175,7 +189,7 @@ module.exports = {
 
                     embed.setDescription(`coins: ${user.coins}\nactive pet: ${newActivePetText}\nxp: ${user.petEXP}`)
 
-                    await modalInteraction.update({embeds: [embed]})
+                    await modalInteraction.update({embeds: [embed], components: components})
                     await modalInteraction.reply({content: `umbenannt zu ${newName}`, ephemeral: true})
                     
 
