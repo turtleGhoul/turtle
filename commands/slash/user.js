@@ -59,7 +59,7 @@ module.exports = {
                 menuOptions.push({
                     label: pet.name,
                     value: key,
-                    emoji: pet.emoji
+                    emoji: { name: pet.emoji }
                 })
 
             } else  {
