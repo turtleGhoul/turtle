@@ -150,7 +150,7 @@ module.exports = {
                 embed.setDescription(`coins: ${user.coins}\nactive pet: ${neuActivePetText}\nxp: ${user.petEXP}`)
 
                 await i.update({embeds: [embed], components: components})
-                await i.reply({content: `auf gehts ${pet_shop[chosen].name}!!`, emphemeral: true})
+                await i.followUp({content: `auf gehts ${pet_shop[chosen].name}!!`, emphemeral: true})
             }
 
             if ( i.isButton() && i.customId === "nicknameButton")   {
@@ -190,7 +190,7 @@ module.exports = {
                     embed.setDescription(`coins: ${user.coins}\nactive pet: ${newActivePetText}\nxp: ${user.petEXP}`)
 
                     await modalInteraction.update({embeds: [embed], components: components})
-                    await modalInteraction.reply({content: `umbenannt zu ${newName}`, ephemeral: true})
+                    await modalInteraction.followUp({content: `umbenannt zu ${newName}`, ephemeral: true})
                     
 
                 } catch ( error )   {
