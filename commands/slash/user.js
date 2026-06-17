@@ -117,6 +117,6 @@ module.exports = {
             .setTimestamp()
 
 
-        await interaction.reply({embeds: [embed], components: components })
+        await interaction.reply({embeds: [embed], components: [components] })
     }
 };
