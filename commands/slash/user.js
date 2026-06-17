@@ -1,8 +1,8 @@
-const { EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder } = require("@discordjs/builders");
+const { EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder } = require("@discordjs/builders");
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const pet_shop = require("../../config.js");
 const User = require('../../User');
-const { FileUploadAssertions, ButtonStyle } = require("discord.js");
+const { FileUploadAssertions, ButtonStyle, TextInputStyle } = require("discord.js");
 
 
 module.exports = {
@@ -117,6 +117,63 @@ module.exports = {
             .setTimestamp()
 
 
-        await interaction.reply({embeds: [embed], components: components })
+        const response = await interaction.reply({embeds: [embed], components: components })
+
+        const collector = response.createMessageComponentCollector({
+            time: 900000
+        })
+
+        collector.on(`collect`, async i =>  {
+            if ( i.user.id !== interaction.user.id )    {
+                return i.reply({ content: `mach das bei deinem eigenem profil..`, emphemeral: true})
+            }
+
+            if ( i.isStringSelectMenu() && i.customId === "equipPetSelect") {
+                const chosen = i.values[0]
+
+                user.pet = chosen
+                await user.save()
+
+                await i.reply({content: `auf gehts ${pet_shop[chosen].name}!!`})
+            }
+
+            if ( i.isButton() && i.customId === "nicknameButton")   {
+
+                const modal = new ModalBuilder()
+                    .setCustomId(`nicknameModal`)
+                    .setTitle(`Nickname`)
+
+                const nameInput = new TextInputBuilder()
+                    .setCustomId(`nicknameInput`)
+                    .setLabel(`wie soll ich heißen?`)
+                    .setStyle(TextInputStyle.Short)
+                    .setMinLength(1)
+                    .setPlaceholder(`z.B. ketaminsniffer 3000`)
+                    .setRequired(true)
+                
+                const modalActionRow = new ActionRowBuilder().addComponents(nameInput)
+
+                modal.addComponents(modalActionRow)
+
+                await i.showModal(modal)
+
+                try {
+                    const modalInteraction = await i.awaitModalSubmit({
+                        filter: mi => mi.customId === `nicknameModal` && mi.user.id === interaction.user.id,
+                        time: 120000
+                    })
+
+                    const newName = modalInteraction.fields.getTextInputValue(`nicknameInput`)
+
+                    user.petname = newName
+                    await user.save()
+
+                    await modalInteraction.reply({content: `umbenannt zu ${newName}`, ephemeral: true})
+
+                } catch ( error )   {
+                    return
+                }
+            }
+        })
     }
 };
