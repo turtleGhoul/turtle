@@ -49,7 +49,7 @@ const pet_shop = {
         event: false,
     },
     raven:  {
-        name: "rabe",
+        name: "black birb",
         price: "300",
         emoji: "🐦‍⬛",
         description: "rabe halt",

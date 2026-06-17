@@ -1,8 +1,8 @@
-const { EmbedBuilder } = require("@discordjs/builders");
+const { EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder } = require("@discordjs/builders");
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const pet_shop = require("../../config.js");
 const User = require('../../User');
-const { FileUploadAssertions } = require("discord.js");
+const { FileUploadAssertions, ButtonStyle } = require("discord.js");
 
 
 module.exports = {
@@ -47,6 +47,60 @@ module.exports = {
             }
         }
 
+        const menuOptions = []
+
+        Object.keys(pet_shop).forEach(key   =>  {
+            
+            const pet = pet_shop[key]
+            const collectedPets = user.collectedpets.includes(key)
+
+            if ( collectedPets )    {
+                
+                menuOptions.push({
+                    label: pet.name,
+                    value: key,
+                    emoji: pet.emoji
+                })
+
+            } else  {
+                return
+            }
+        })
+
+        const selectMenu = new StringSelectMenuBuilder()
+            .setCustomId(`equpipPetSelect`)
+            .setPlaceholder(`active pet`)
+
+        if  ( menuOptions.length > 0 )  {
+            selectMenu.addOptions(menuOptions)
+        }  else {
+            selectMenu.addOptions([
+                {
+                    label: `leer`,
+                    value: `none`
+                }
+            ])
+            selectMenu.setDisabled(true)
+        }
+
+        const SelectRow = new ActionRowBuilder().addComponents(selectMenu)
+
+        let ButtonRow = null
+        if ( user.collectedpets )   {
+            const button = new ButtonBuilder()
+                    .setCustomId(`nicknameButton`)
+                    .setLabel(`change petname`)
+                    .setStyle(ButtonStyle.Success)
+            
+            ButtonRow = new ActionRowBuilder().addComponents(button)
+        }
+
+        const components = [ selectMenu ]  
+        if ( ButtonRow )    {
+            components.push(ButtonRow)
+        }
+
+
         const embed = new EmbedBuilder()
             .setTitle(`${interaction.user.username}`)
             .setDescription(`coins: ${user.coins}\nactive pet: ${activePetText}\nxp: ${user.petEXP}`)
@@ -63,6 +117,6 @@ module.exports = {
             .setTimestamp()
 
 
-        await interaction.reply({embeds: [embed], })
+        await interaction.reply({embeds: [embed], components: components })
     }
 };
