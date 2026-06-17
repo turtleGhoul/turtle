@@ -68,7 +68,7 @@ module.exports = {
         })
 
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId(`equpipPetSelect`)
+            .setCustomId(`equipPetSelect`)
             .setPlaceholder(`active pet`)
 
         if  ( menuOptions.length > 0 )  {
