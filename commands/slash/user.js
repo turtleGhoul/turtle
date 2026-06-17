@@ -12,6 +12,8 @@ module.exports = {
         
     async execute(interaction) {
 
+        await interaction.deferReply()
+
         const id = interaction.user.id
 
         let user = await User.findOne({ userId: id })
@@ -117,7 +119,7 @@ module.exports = {
             .setTimestamp()
 
 
-        const response = await interaction.reply({embeds: [embed], components: components })
+        const response = await interaction.editReply({embeds: [embed], components: components })
 
         const collector = response.createMessageComponentCollector({
             time: 900000
@@ -168,7 +170,14 @@ module.exports = {
                     user.petname = newName
                     await user.save()
 
+                    const petConfig = pet_shop[user.pet]
+                    const newActivePetText = `**${newName}** (${petConfig.name})`
+
+                    embed.setDescription(`coins: ${user.coins}\nactive pet: ${newActivePetText}\nxp: ${user.petEXP}`)
+
+                    await modalInteraction.update({embeds: [embed]})
                     await modalInteraction.reply({content: `umbenannt zu ${newName}`, ephemeral: true})
+                    
 
                 } catch ( error )   {
                     return
