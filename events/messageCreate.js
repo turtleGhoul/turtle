@@ -13,8 +13,23 @@ module.exports = {
         }
 
         // valerie 
+        const gangId = "1446402065168334941"
+
         if(message.author.id === "593787819693178900") {
-            return message.react(`🖕`)
+            if ( message.guild.id === gangId )  {
+                const hasImg = message.attachments.size > 0
+
+                if ( hasImg )   {
+                    return message.react(`🖕`)
+                } else  {
+                    const randomizer = Math.random()
+                    if ( randomizer <= 0.20 )   {
+                        return message.react(`🖕`)
+                    }
+                }
+            } else {
+                return message.react(`🖕`)
+            }
         }
 
         if(message.content.toLowerCase() === "valerie") {
